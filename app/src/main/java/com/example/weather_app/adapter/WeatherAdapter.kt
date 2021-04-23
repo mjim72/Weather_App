@@ -6,14 +6,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.weather_app.databinding.WeatherItemBinding
 import com.example.weather_app.model.Result
 
-class WeatherAdapter : RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
+class WeatherAdapter(
+    private val clickListener: (Result) -> Unit
+) : RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() {
 
     private val dataSet = mutableListOf<Result>()
-    private lateinit var clickListener: ClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WeatherViewHolder {
         val binding = WeatherItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return WeatherViewHolder(binding, clickListener)
+        return WeatherViewHolder(binding).apply {
+            itemView.setOnClickListener { clickListener.invoke(dataSet[adapterPosition]) }
+        }
     }
 
     override fun onBindViewHolder(holder: WeatherViewHolder, position: Int) {
@@ -22,23 +25,18 @@ class WeatherAdapter : RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder>() 
 
     override fun getItemCount(): Int = dataSet.size
 
-    fun setAdapter(results: List<Result>, listener: ClickListener) {
+    fun setList(results: List<Result>) {
         dataSet.clear()
         dataSet.addAll(results)
-        clickListener = listener
         notifyDataSetChanged()
     }
 
     class WeatherViewHolder(
-        private val binding: WeatherItemBinding,
-        private val listener: ClickListener
+        private val binding: WeatherItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         fun load(result: Result) = with(binding) {
             tvWeatherMain.text = result.weather.first().main
-            tvTemp.text = "Temp: ${result.main.temp.toString().substringBefore(".")}"
-            root.setOnClickListener {
-                listener.itemClicked(result)
-            }
+            tvTemp.text = String.format("Temp: %s", result.main.temp.toString().substringBefore("."))
         }
     }
 }

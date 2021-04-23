@@ -1,6 +1,5 @@
 package com.example.weather_app.remote
 
-import com.example.weather_app.BuildConfig
 import com.example.weather_app.model.WeatherResponse
 import retrofit2.Response
 import retrofit2.http.GET

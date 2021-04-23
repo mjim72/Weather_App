@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.weather_app.R
 import com.example.weather_app.adapter.ClickListener
 import com.example.weather_app.adapter.WeatherAdapter
 import com.example.weather_app.databinding.FragmentListBinding
@@ -19,53 +20,39 @@ import com.example.weather_app.viewmodel.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ListFragment : Fragment(), ClickListener {
+class ListFragment : Fragment(R.layout.fragment_list) {
 
-    private lateinit var cityName : String
-    private val weatherAdapter by lazy { WeatherAdapter() }
+    private val weatherAdapter by lazy { WeatherAdapter(::itemClicked) }
     private lateinit var binding : FragmentListBinding
     private val viewModel: WeatherViewModel by viewModels()
     private val args by navArgs<ListFragmentArgs>()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentListBinding.inflate(inflater, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding = FragmentListBinding.bind(view)
         setupBinding()
-        setupObserver()
-        return binding.root
+        loadWeather()
     }
 
-    private fun setupBinding() {
-        binding.apply {
-
-            btnButton.setOnClickListener {
-                findNavController().popBackStack()
-            }
-
-            rvWeather.apply {
-                adapter = weatherAdapter
-                layoutManager = LinearLayoutManager(requireContext())
-            }
-        }
+    private fun setupBinding() = with(binding) {
+        btnButton.setOnClickListener { findNavController().popBackStack() }
+        rvWeather.apply { adapter = weatherAdapter }
     }
 
-    private fun setupObserver() {
-        viewModel.fetchWeather(args.query)
-        viewModel.result.observe(viewLifecycleOwner, { result ->
-            cityName = result.data?.city?.name.toString()
-            binding.toolbarTitle.text = cityName
-            result.data?.list?.let { it -> weatherAdapter.setAdapter(it, this) }
-
-            binding.progressBar.isVisible = result is Resource.Loading && result.data == null
-            binding.tvNotFound.isVisible = result is Resource.Error && result.data == null
-            binding.tvNotFound.text = result.error
+    private fun loadWeather() = with(viewModel) {
+        fetchWeather(args.query)
+        result.observe(viewLifecycleOwner, { result ->
+            if (result is Resource.Success) weatherAdapter.setList(result.data)
+            with(binding) {
+                toolbarTitle.text = args.query
+                progressBar.isVisible = result is Resource.Loading
+                tvNotFound.isVisible = result is Resource.Error
+                tvNotFound.text = if (result is Resource.Error) result.msg else ""
+            }
         })
     }
 
-    override fun itemClicked(result: Result) {
-        val action = ListFragmentDirections.actionListFragmentToDetailFragment(result, cityName)
-        findNavController().navigate(action)
+    private fun itemClicked(result: Result) = with(ListFragmentDirections) {
+        findNavController().navigate(actionListFragmentToDetailFragment(result, args.query))
     }
 }

@@ -1,10 +1,7 @@
 package com.example.weather_app.util
 
-sealed class Resource<T>(
-    val data: T? = null,
-    val error: String? = null
-) {
-    class Success<T>(data: T) : Resource<T>(data)
-    class Loading<T>(data: T? = null) : Resource<T>(data)
-    class Error<T>(msg: String, data: T? = null) : Resource<T>(data, msg)
+sealed class Resource<out T> {
+    object Loading : Resource<Nothing>()
+    data class Success<T>(val data: T) : Resource<T>()
+    data class Error<T>(val msg: String) : Resource<T>()
 }
