@@ -12,7 +12,7 @@ interface WeatherApi {
   suspend fun fetchWeather(
       @Query("q") query : String,
       @Query("units") unit: String = "imperial",
-      @Query("appid") apiKey : String = BuildConfig.API_KEY
+      @Query("appid") apiKey : String = "65d00499677e59496ca2f318eb68c049"
   ) : Response<WeatherResponse>
 
 }

@@ -1,7 +1,6 @@
 package com.example.weather_app.view
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.weather_app.R
 import com.example.weather_app.adapter.ClickListener
 import com.example.weather_app.adapter.WeatherAdapter
 import com.example.weather_app.databinding.FragmentListBinding
